@@ -71,7 +71,7 @@ async IAsyncEnumerable<SubRedditUsersResponse> GetRealTimeUsers()
 void WriteToExcelEvery15Mins<T>(T[] data, string path)
 {
     var startTimeSpan = TimeSpan.Zero;
-    var periodTimeSpan = TimeSpan.FromMinutes(1);
+    var periodTimeSpan = TimeSpan.FromMinutes(15);
 
     var timer = new Timer((e) =>
     {
