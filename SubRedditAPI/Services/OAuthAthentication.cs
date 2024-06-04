@@ -10,13 +10,19 @@ namespace SubRedditAPI.Services
     public class OAuthAthentication : IAuthentication
     {
         private static volatile OAuthAthentication oAuthAthentication;
-        public RedditToken token = new RedditToken();
-        private static readonly string REDDIT_AUTH_URL = "https://www.reddit.com/api/v1/access_token";
-        string appId = ConfigurationManager.AppSettings["AppId"];
-        string secret = ConfigurationManager.AppSettings["Secret"];
-        string userName = ConfigurationManager.AppSettings["Username"];
-        string password = ConfigurationManager.AppSettings["Password"];
+        private static readonly SemaphoreSlim accessTokenSemaphore;
+        private static RedditToken token;
+        private static readonly string REDDIT_AUTH_URL = ConfigurationManager.AppSettings["RedditAuthURL"];
+        private static string appId = ConfigurationManager.AppSettings["AppId"];
+        private static string secret = ConfigurationManager.AppSettings["Secret"];
+        private static string userName = ConfigurationManager.AppSettings["Username"];
+        private static string password = ConfigurationManager.AppSettings["Password"];
 
+        static OAuthAthentication()
+        {
+            token = null!;
+            accessTokenSemaphore = new SemaphoreSlim(1, 1);          
+        }
 
         public static IAuthentication GetAuthenticationService()
         {
@@ -27,30 +33,41 @@ namespace SubRedditAPI.Services
             return oAuthAthentication;
         }
 
-            public async Task<RedditToken> Authenticate()
+        public async Task<RedditToken> Authenticate()
+        {
+            try
             {
-                try
+                var x = await GetAccessToken(userName, password, appId, secret);
+                DateTime tokenExpiresTime;
+                tokenExpiresTime = DateTime.Now.AddSeconds(x.expires_in);
+                token = new RedditToken()
                 {
-                    var x = await GetAccessToken(userName, password, appId, secret);
-                    token = new RedditToken()
-                    {
-                        access_token = x.access_token,
-                        token_type = x.token_type,
-                        expires_in = x.expires_in
-                    };
-                    return token;
-                }
-                catch (Exception ex)
-                {
-                    ExceptionLogging.SendErrorToText(ex); ;
-                    return new RedditToken();
-                }
+                    access_token = x.access_token,
+                    token_type = x.token_type,
+                    expires_in = x.expires_in,
+                    Expired = !(DateTime.Now < tokenExpiresTime)                  
+
+            };
+                return token;
             }
+            catch (Exception ex)
+            {
+                ExceptionLogging.SendErrorToText(ex);
+                return null;
+            }
+        }
 
         private async Task<RedditToken> GetAccessToken(string userName, string password, string appId, string secret)
         {
             try
             {
+                await accessTokenSemaphore.WaitAsync();
+
+                if (token is { Expired: false })
+                {
+                    return token;
+                }
+
                 var url = $"{REDDIT_AUTH_URL}?grant_type=password&username={userName}&password={password}";
                 var byteArray = Encoding.ASCII.GetBytes($"{appId}:{secret}");
                 HttpClient client = new HttpClient();
@@ -72,6 +89,10 @@ namespace SubRedditAPI.Services
             catch (Exception ex)
             {
                 ExceptionLogging.SendErrorToText(ex);
+            }
+            finally
+            {
+                accessTokenSemaphore.Release(1);
             }
             return new RedditToken();
         }

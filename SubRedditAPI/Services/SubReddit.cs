@@ -17,7 +17,6 @@ namespace SubRedditAPI.Services
         public SubReddit(IAuthentication auth)
         {
             _auth = auth;
-            GetToken();  //instantiate Token
         }
         private void GetToken()
         {
@@ -35,8 +34,8 @@ namespace SubRedditAPI.Services
             SubRedditPostsResponse posts = new SubRedditPostsResponse();    
             try
             {
-
-                HttpResponseMessage response = await _client.GetAsync($"{REDDIT_OAUTH_BASE_URL}/r/worldnews/new");
+                GetToken();  //instantiate Token
+                HttpResponseMessage response = await _client.GetAsync($"/r/worldnews/new");
                 var data = await response.Content.ReadAsStringAsync();
                 posts = GeneratePostsResponse(data);
                 if (!response.IsSuccessStatusCode)
@@ -56,7 +55,8 @@ namespace SubRedditAPI.Services
             SubRedditUsersResponse users = new SubRedditUsersResponse();
             try
             {
-                HttpResponseMessage response = await _client.GetAsync($"{REDDIT_OAUTH_BASE_URL}/r/worldnews/new");
+                GetToken();  //instantiate Token
+                HttpResponseMessage response = await _client.GetAsync($"/r/worldnews/new");
                 var data = await response.Content.ReadAsStringAsync();
                 users = GenerateUserResponse(data);
                 if (!response.IsSuccessStatusCode)

@@ -3,16 +3,16 @@ namespace SubRedditAPI
 {
     public static class ExceptionLogging
     {
-        private static string ErrorlineNo, Errormsg, extype, exurl, hostIp, ErrorLocation, HostAdd;
+        private static string errorLineNo, errorMsg, exType, errorLocation;
 
         public static void SendErrorToText(Exception ex)
         {
             var line = Environment.NewLine + Environment.NewLine;
 
-            ErrorlineNo = ex?.StackTrace.Substring(ex.StackTrace.Length - 7, 7);
-            Errormsg = ex.GetType().Name.ToString();
-            extype = ex.GetType().ToString();
-            ErrorLocation = ex.Message.ToString();
+            errorLineNo = ex?.StackTrace.Substring(ex.StackTrace.Length - 7, 7);
+            errorMsg = ex.GetType().Name.ToString();
+            exType = ex.GetType().ToString();
+            errorLocation = ex.Message.ToString();
 
             try
             {
@@ -29,9 +29,9 @@ namespace SubRedditAPI
                 }
                 using (StreamWriter sw = File.AppendText(filePath))
                 {
-                    string error = "Log Written Date:" + " " + DateTime.Now.ToString() + line + "Error Line No :" + " " + ErrorlineNo + line + "Error Message:" + " " + Errormsg + line + "Exception Type:" + " " + extype + line + "Error Location :" + " " + ErrorLocation + line + " Error Page Url:" + " " + exurl + line + "User Host IP:" + " " + hostIp + line;
+                    string error = "Log Written Date:" + " " + DateTime.Now.ToString() + line + "Error Line No :" + " " + errorLineNo + line + "Error Message:" + " " + errorMsg + line + "Exception Type:" + " " + exType + line + "Error Location :" + " " + errorLocation + line;
                     sw.WriteLine("-----------Exception Details on " + " " + DateTime.Now.ToString() + "-----------------");
-                    sw.WriteLine("-------------------------------------------------------------------------------------");
+                    sw.WriteLine("-------------------------------------------------------------------------------");
                     sw.WriteLine(line);
                     sw.WriteLine(error);
                     sw.WriteLine("--------------------------------*End*------------------------------------------");

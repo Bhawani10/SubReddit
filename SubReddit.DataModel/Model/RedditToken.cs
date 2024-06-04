@@ -6,5 +6,6 @@
         public string token_type { get; set; } = string.Empty;
         public long expires_in { get; set; }
         public string scope { get; set; } = string.Empty;
+        public bool Expired { get; set; } = false;
     }
 }

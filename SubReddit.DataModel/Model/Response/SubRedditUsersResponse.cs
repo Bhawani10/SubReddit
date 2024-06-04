@@ -2,10 +2,6 @@
 {
     public class SubRedditUsersResponse
     {
-        public SubRedditUsersResponse()
-        {
-            RedditUsers = new List<User>();
-        }
-        public List<User> RedditUsers { get; set; }
+        public List<User> RedditUsers { get; set; } = new List<User>();
     }
 }

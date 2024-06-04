@@ -12,4 +12,10 @@
     <ProjectReference Include="..\SubRedditAPI\SubRedditAPI.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="App.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
